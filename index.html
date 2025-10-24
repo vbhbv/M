@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>وكيل EEAI: محاكي القرار الأخلاقي</title>
+    <script src="js/EEAI_Logic.js"></script>
+    <style>
+        body { font-family: 'Arial', sans-serif; padding: 20px; background-color: #f4f7f6; }
+        .container { max-width: 800px; margin: auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .input-group { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
+        input[type="range"] { width: 100%; }
+        #output { margin-top: 30px; padding: 20px; background-color: #e6f7ff; border: 1px solid #b3e0ff; border-radius: 8px; }
+        .agent-response { font-size: 1.1em; color: #004d99; font-weight: bold; }
+        .v-value { color: #cc0000; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>محاكي وكيل EEAI: معادلة القرار الأخلاقي</h1>
+        <p>تحكم في قيم الإلزام والمكافآت لتوقع سلوك الوكيل.</p>
+
+        <div class="input-group">
+            <label>شدة الإلزام بالصدق (Λ_Honesty): <span id="lambdaHonestyValue">1.0</span></label>
+            <input type="range" id="lambdaHonesty" min="0" max="10" step="0.1" value="1.0" oninput="document.getElementById('lambdaHonestyValue').innerText=this.value">
+        </div>
+        
+        <div class="input-group">
+            <label>شدة الإلزام بالسلامة (Λ_Safety): <span id="lambdaSafetyValue">0.0</span></label>
+            <input type="range" id="lambdaSafety" min="0" max="10" step="0.1" value="0.0" oninput="document.getElementById('lambdaSafetyValue').innerText=this.value">
+        </div>
+
+        <div class="input-group">
+            <label>المكافأة الخارجية للغش (R_ext_Cheat): <span id="rExtCheatValue">5.0</span></label>
+            <input type="range" id="rExtCheat" min="0" max="10" step="0.1" value="5.0" oninput="document.getElementById('rExtCheatValue').innerText=this.value">
+        </div>
+
+        <div class="input-group">
+            <label>المكافأة الخارجية للصدق (R_ext_Right): <span id="rExtRightValue">1.0</span></label>
+            <input type="range" id="rExtRight" min="0" max="10" step="0.1" value="1.0" oninput="document.getElementById('rExtRightValue').innerText=this.value">
+        </div>
+        
+        <button onclick="runSimulation()">حلل القرار</button>
+
+        <div id="output">
+            <h2>تقرير الوكيل EEAI (الرد):</h2>
+            <p id="agentResponse" class="agent-response">اضغط 'حلل القرار' لبدء التفاعل.</p>
+            <p>V_Cheat: <span id="vCheat" class="v-value">N/A</span></p>
+            <p>V_Right: <span id="vRight" class="v-value">N/A</span></p>
+        </div>
+    </div>
+
+    <script>
+        function runSimulation() {
+            // 1. قراءة المدخلات
+            const lambdaH = parseFloat(document.getElementById('lambdaHonesty').value);
+            const lambdaS = parseFloat(document.getElementById('lambdaSafety').value);
+            const rExtC = parseFloat(document.getElementById('rExtCheat').value);
+            const rExtR = parseFloat(document.getElementById('rExtRight').value);
+
+            // 2. تشغيل وكيل EEAI (إنشاء مثيل جديد)
+            const agent = new EEAI_Agent(lambdaH, lambdaS);
+            const results = agent.decide(rExtR, rExtC);
+
+            // 3. صياغة الرد (تحديث الواجهة)
+            let responseText = `بصفتي وكيل EEAI، وبناءً على قيم الإلزام الحالية، قراري هو: ${results.decision}.`;
+
+            if (results.decision === 'Cheat') {
+                responseText += ` لقد تم تفضيل المنفعة الخارجية ($\text{R}_{\text{ext}}$) على العقوبة الأخلاقية.`;
+            } else {
+                responseText += ` لقد تم تفعيل الإلزام الأخلاقي ($\mathbf{\Lambda}$) بنجاح، مما جعل خيار الغش غير مجدٍ رياضياً.`;
+            }
+
+            // 4. تحديث العناصر في الواجهة
+            document.getElementById('agentResponse').innerText = responseText;
+            document.getElementById('vCheat').innerText = results.V_cheat.toFixed(2);
+            document.getElementById('vRight').innerText = results.V_right.toFixed(2);
+        }
+    </script>
+</body>
+</html>
